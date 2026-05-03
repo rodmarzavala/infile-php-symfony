@@ -38,6 +38,11 @@ final class InfilePhpExtension extends Extension
 
         $loader->load('services.yaml');
 
+        // Alias PSR interfaces so we can fetch them in the bundle boot
+        $container->setAlias('infile_php.http_client', \Psr\Http\Client\ClientInterface::class)->setPublic(true);
+        $container->setAlias('infile_php.request_factory', \Psr\Http\Message\RequestFactoryInterface::class)->setPublic(true);
+        $container->setAlias('infile_php.stream_factory', \Psr\Http\Message\StreamFactoryInterface::class)->setPublic(true);
+
         // Register core SDK services
         $container->register(\InfilePhp\Core\FelConfig::class, \InfilePhp\Core\FelConfig::class)
             ->setFactory([self::class, 'createFelConfig'])
@@ -45,7 +50,12 @@ final class InfilePhpExtension extends Extension
             ->setPublic(true);
 
         $container->register(\InfilePhp\Core\Http\InfileClient::class, \InfilePhp\Core\Http\InfileClient::class)
-            ->setArguments([new \Symfony\Component\DependencyInjection\Reference(\InfilePhp\Core\FelConfig::class)])
+            ->setArguments([
+                new \Symfony\Component\DependencyInjection\Reference(\InfilePhp\Core\FelConfig::class),
+                new \Symfony\Component\DependencyInjection\Reference(\Psr\Http\Client\ClientInterface::class),
+                new \Symfony\Component\DependencyInjection\Reference(\Psr\Http\Message\RequestFactoryInterface::class),
+                new \Symfony\Component\DependencyInjection\Reference(\Psr\Http\Message\StreamFactoryInterface::class),
+            ])
             ->setPublic(true);
     }
 
@@ -59,25 +69,37 @@ final class InfilePhpExtension extends Extension
      */
     public static function createFelConfig(array $config): \InfilePhp\Core\FelConfig
     {
+        /** @var array<string, mixed> $credentials */
+        $credentials = is_array($config['credentials'] ?? null) ? $config['credentials'] : [];
+        /** @var array<string, mixed> $retry */
+        $retry = is_array($config['retry'] ?? null) ? $config['retry'] : [];
+        /** @var array<string, mixed> $fallback */
+        $fallback = is_array($config['fallback'] ?? null) ? $config['fallback'] : [];
+        /** @var array<string, mixed> $endpoints */
+        $endpoints = is_array($config['endpoints'] ?? null) ? $config['endpoints'] : [];
+
+        $env = is_string($config['environment'] ?? null) ? $config['environment'] : 'sandbox';
+        $flow = is_string($config['flow'] ?? null) ? $config['flow'] : 'unified';
+
         return new \InfilePhp\Core\FelConfig(
-            nit: $config['nit'] ?? '',
-            signUser: $config['credentials']['sign_user'] ?? '',
-            signKey: $config['credentials']['sign_key'] ?? '',
-            apiUser: $config['credentials']['api_user'] ?? '',
-            apiKey: $config['credentials']['api_key'] ?? '',
-            environment: \InfilePhp\Core\Enums\Environment::from($config['environment'] ?? 'sandbox'),
-            flow: \InfilePhp\Core\Enums\Flow::from($config['flow'] ?? 'unified'),
-            emailCopy: $config['email_copy'] ?? '',
-            retryTimes: $config['retry']['times'] ?? 3,
-            retrySleep: $config['retry']['sleep'] ?? 2,
-            fallbackEnabled: $config['fallback']['enabled'] ?? true,
-            endpointSign: $config['endpoints']['sign'] ?? 'https://signer-emisores.feel.com.gt/sign_solicitud_firmas/firma_xml',
-            endpointCertify: $config['endpoints']['certify'] ?? 'https://certificador.feel.com.gt/fel/certificacion/v2/dte/',
-            endpointCancel: $config['endpoints']['cancel'] ?? 'https://certificador.feel.com.gt/fel/anulacion/v2/dte/',
-            endpointUnified: $config['endpoints']['unified'] ?? 'https://certificador.feel.com.gt/fel/procesounificado/transaccion/v2/xml',
-            endpointNit: $config['endpoints']['nit'] ?? 'https://consultareceptores.feel.com.gt/rest/action',
-            endpointCui: $config['endpoints']['cui'] ?? 'https://certificador.feel.com.gt/api/v2/servicios/externos/cui',
-            endpointCuiAuth: $config['endpoints']['cui_auth'] ?? 'https://certificador.feel.com.gt/api/v2/servicios/externos/login',
+            nit: is_string($config['nit'] ?? null) ? $config['nit'] : '',
+            signUser: is_string($credentials['sign_user'] ?? null) ? $credentials['sign_user'] : '',
+            signKey: is_string($credentials['sign_key'] ?? null) ? $credentials['sign_key'] : '',
+            apiUser: is_string($credentials['api_user'] ?? null) ? $credentials['api_user'] : '',
+            apiKey: is_string($credentials['api_key'] ?? null) ? $credentials['api_key'] : '',
+            environment: \InfilePhp\Core\Enums\Environment::from($env),
+            flow: \InfilePhp\Core\Enums\Flow::from($flow),
+            emailCopy: is_string($config['email_copy'] ?? null) ? $config['email_copy'] : '',
+            retryTimes: is_int($retry['times'] ?? null) ? $retry['times'] : 3,
+            retrySleep: is_int($retry['sleep'] ?? null) ? $retry['sleep'] : 2,
+            fallbackEnabled: is_bool($fallback['enabled'] ?? null) ? $fallback['enabled'] : true,
+            endpointSign: is_string($endpoints['sign'] ?? null) ? $endpoints['sign'] : 'https://signer-emisores.feel.com.gt/sign_solicitud_firmas/firma_xml',
+            endpointCertify: is_string($endpoints['certify'] ?? null) ? $endpoints['certify'] : 'https://certificador.feel.com.gt/fel/certificacion/v2/dte/',
+            endpointCancel: is_string($endpoints['cancel'] ?? null) ? $endpoints['cancel'] : 'https://certificador.feel.com.gt/fel/anulacion/v2/dte/',
+            endpointUnified: is_string($endpoints['unified'] ?? null) ? $endpoints['unified'] : 'https://certificador.feel.com.gt/fel/procesounificado/transaccion/v2/xml',
+            endpointNit: is_string($endpoints['nit'] ?? null) ? $endpoints['nit'] : 'https://consultareceptores.feel.com.gt/rest/action',
+            endpointCui: is_string($endpoints['cui'] ?? null) ? $endpoints['cui'] : 'https://certificador.feel.com.gt/api/v2/servicios/externos/cui',
+            endpointCuiAuth: is_string($endpoints['cui_auth'] ?? null) ? $endpoints['cui_auth'] : 'https://certificador.feel.com.gt/api/v2/servicios/externos/login',
         );
     }
 }

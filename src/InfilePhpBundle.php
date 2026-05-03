@@ -20,7 +20,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  */
 final class InfilePhpBundle extends Bundle
 {
-    public function getContainerExtension(): ExtensionInterface
+    public function getContainerExtension(): ?ExtensionInterface
     {
         return new InfilePhpExtension();
     }
@@ -32,12 +32,25 @@ final class InfilePhpBundle extends Bundle
 
     public function boot(): void
     {
+        if ($this->container === null) {
+            return;
+        }
+
         /** @var FelConfig $config */
         $config = $this->container->get(FelConfig::class);
 
         /** @var EventDispatcherInterface $dispatcher */
         $dispatcher = $this->container->get('event_dispatcher');
 
-        InfilePhp::configure($config, $dispatcher);
+        /** @var \Psr\Http\Client\ClientInterface $httpClient */
+        $httpClient = $this->container->get('infile_php.http_client');
+
+        /** @var \Psr\Http\Message\RequestFactoryInterface $requestFactory */
+        $requestFactory = $this->container->get('infile_php.request_factory');
+
+        /** @var \Psr\Http\Message\StreamFactoryInterface $streamFactory */
+        $streamFactory = $this->container->get('infile_php.stream_factory');
+
+        InfilePhp::configure($config, $httpClient, $requestFactory, $streamFactory, $dispatcher);
     }
 }
