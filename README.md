@@ -4,26 +4,26 @@
 [![PHP Version Require](https://img.shields.io/packagist/php-v/rodmarzavala/infile-php-symfony)](https://packagist.org/packages/rodmarzavala/infile-php-symfony)
 [![License](https://img.shields.io/packagist/l/rodmarzavala/infile-php-symfony)](https://packagist.org/packages/rodmarzavala/infile-php-symfony)
 
-The official Symfony bundle for the `infile-php` Guatemala FEL (Factura Electrónica en Línea) SDK.
-Features zero-config integration, Messenger support, and a dedicated Profiler DataCollector.
+El bundle oficial para Symfony del SDK `infile-php` de facturación electrónica en línea (FEL) para Guatemala.
+Incluye integración *zero-config*, soporte para Symfony Messenger y un *DataCollector* dedicado en el Profiler.
 
-> **Note:** This repository is a read-only split of the main `infile-php` monorepo. Please submit issues and pull requests to the [main repository](https://github.com/rodmarzavala/infile-php).
+> **Nota:** Este repositorio es una división de solo lectura (read-only split) del monorepo principal `infile-php`. Por favor, envía tus *issues* y *pull requests* al [repositorio principal](https://github.com/rodmarzavala/infile-php).
 
-## Installation
+## Instalación
 
 ```bash
 composer require rodmarzavala/infile-php-symfony
 ```
 
-## Documentation
+## Documentación
 
-For full documentation, configuration options, and API reference, please visit our official documentation site:
+Para acceder a la documentación completa, opciones de configuración y referencia de la API, por favor visita nuestro sitio oficial:
 
-**👉 [Official Documentation (rodmarzavala.github.io/infile-php)](https://rodmarzavala.github.io/infile-php/)**
+**👉 [Documentación Oficial (rodmarzavala.github.io/infile-php)](https://rodmarzavala.github.io/infile-php/)**
 
-## Usage Example
+## Ejemplo de Uso
 
-Inject the `InfileService` into your controllers or services:
+Inyecta el `InfileService` en tus controladores o servicios:
 
 ```php
 namespace App\Controller;
@@ -47,7 +47,7 @@ class InvoiceController extends AbstractController
                 ->add(Item::product('Laptop')->quantity(1)->unitPrice(8500.00))
         );
 
-        return new Response('Issued DTE: ' . $response->uuid());
+        return new Response('DTE Emitido con UUID: ' . $response->uuid());
     }
 }
 ```
