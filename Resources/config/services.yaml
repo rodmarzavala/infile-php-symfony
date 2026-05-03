@@ -1,0 +1,24 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    InfilePhp\Symfony\DataCollector\FelDataCollector:
+        public: true
+        tags:
+            - { name: data_collector, template: '@InfilePhp/data_collector/fel.html.twig', id: infile_php.fel }
+
+    InfilePhp\Symfony\HealthCheck\InfileHealthCheck:
+        public: true
+
+    InfilePhp\Symfony\EventSubscriber\FelEventSubscriber:
+        arguments:
+            $logger: '@logger'
+            $collector: '@InfilePhp\Symfony\DataCollector\FelDataCollector'
+        tags:
+            - { name: kernel.event_subscriber }
+
+    InfilePhp\Symfony\Messenger\IssueDteHandler:
+        tags:
+            - { name: messenger.message_handler }

@@ -1,0 +1,117 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set issued = collector.issuedCount %}
+    {% set failed = collector.failedCount %}
+    {% set color = failed > 0 ? 'red' : (issued > 0 ? 'green' : 'default') %}
+
+    {% set icon %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span class="sf-toolbar-value">{{ issued }}</span>
+        {% if failed > 0 %}
+            <span class="sf-toolbar-info-piece-additional-detail" style="color:red"> ({{ failed }} failed)</span>
+        {% endif %}
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>FEL (infile-php)</b>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Issued</b>
+            <span class="sf-toolbar-status sf-toolbar-status-{{ color }}">{{ issued }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Failed</b>
+            <span class="sf-toolbar-status {% if failed > 0 %}sf-toolbar-status-red{% endif %}">{{ failed }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: profiler_url, status: color }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label">
+        <span class="icon">📄</span>
+        <strong>FEL</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>FEL — infile-php</h2>
+
+    <div class="metrics">
+        <div class="metric">
+            <span class="value">{{ collector.issuedCount }}</span>
+            <span class="label">DTEs Issued</span>
+        </div>
+        <div class="metric">
+            <span class="value">{{ collector.failedCount }}</span>
+            <span class="label">Failed</span>
+        </div>
+    </div>
+
+    {% if collector.dtes is not empty %}
+        <h3>Issued DTEs</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>UUID</th>
+                    <th>Type</th>
+                    <th>Serie / Número</th>
+                    <th>Recipient NIT</th>
+                    <th>Sign (ms)</th>
+                    <th>Certify (ms)</th>
+                    <th>Total (ms)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dte in collector.dtes %}
+                    <tr>
+                        <td><code>{{ dte.uuid }}</code></td>
+                        <td>{{ dte.type }}</td>
+                        <td>{{ dte.serie }} / {{ dte.numero }}</td>
+                        <td>{{ dte.recipient }}</td>
+                        <td>{{ dte.timings.sign_ms ?? '—' }}</td>
+                        <td>{{ dte.timings.certify_ms ?? '—' }}</td>
+                        <td>{{ dte.timings.total_ms ?? '—' }}</td>
+                    </tr>
+                    {% if dte.xml_certified %}
+                        <tr>
+                            <td colspan="7">
+                                <details>
+                                    <summary>Certified XML</summary>
+                                    <pre>{{ dte.xml_certified }}</pre>
+                                </details>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if collector.errors is not empty %}
+        <h3>Errors</h3>
+        <table>
+            <thead>
+                <tr><th>Type</th><th>Error Message</th></tr>
+            </thead>
+            <tbody>
+                {% for error in collector.errors %}
+                    <tr>
+                        <td>{{ error.type }}</td>
+                        <td>{{ error.message }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
