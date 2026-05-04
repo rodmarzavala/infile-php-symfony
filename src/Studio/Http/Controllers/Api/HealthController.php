@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace InfilePhp\Symfony\Studio\Http\Controllers\Api;
 
+use Exception;
 use InfilePhp\Core\FelConfig;
 use InfilePhp\Core\Sat\Rtu;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Exception;
 
 final class HealthController
 {

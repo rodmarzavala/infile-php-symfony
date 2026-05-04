@@ -60,7 +60,7 @@ final class BuilderController
         $invoice = Invoice::create();
 
         $payload = json_decode($request->getContent(), true) ?? [];
-        
+
         $recipientData = $payload['recipient'] ?? [];
 
         if (isset($recipientData['tax_id']) && $recipientData['tax_id'] === 'CF') {
