@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace InfilePhp\Symfony\Messenger;
 
-use InfilePhp\Core\Http\InfileClient;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
@@ -14,7 +13,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 final class IssueDteHandler
 {
-    public function __construct(private readonly InfileClient $client)
+    public function __construct()
     {
     }
 
