@@ -63,6 +63,13 @@ final class Configuration implements ConfigurationInterface
                         ->booleanNode('enabled')->defaultTrue()->end()
                     ->end()
                 ->end()
+                ->arrayNode('studio')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')->defaultTrue()->end()
+                        ->scalarNode('driver')->defaultValue('sqlite')->end()
+                    ->end()
+                ->end()
             ->end();
 
         return $treeBuilder;

@@ -22,3 +22,30 @@ services:
     InfilePhp\Symfony\Messenger\IssueDteHandler:
         tags:
             - { name: messenger.message_handler }
+
+    # Studio Services
+    InfilePhp\Symfony\Studio\Storage\StudioRepository:
+        public: true
+        arguments:
+            $driver: '%infile_php.studio.driver%'
+            $projectDir: '%kernel.project_dir%'
+
+    InfilePhp\Symfony\EventSubscriber\StudioEventSubscriber:
+        public: true
+        arguments:
+            $repository: '@InfilePhp\Symfony\Studio\Storage\StudioRepository'
+        tags:
+            - { name: kernel.event_subscriber }
+
+    InfilePhp\Symfony\Studio\Http\Middleware\StudioSecurityListener:
+        public: true
+        arguments:
+            $authChecker: '@?security.authorization_checker'
+            $csrfTokenManager: '@?security.csrf.token_manager'
+            $environment: '%kernel.environment%'
+        tags:
+            - { name: kernel.event_subscriber }
+
+    InfilePhp\Symfony\Studio\Http\Controllers\:
+        resource: '../../src/Studio/Http/Controllers'
+        tags: ['controller.service_arguments']
